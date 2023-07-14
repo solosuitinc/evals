@@ -44,7 +44,7 @@ class DummyCompletionResult(CompletionResult):
     def get_completions(self) -> list[str]:
         return ["This is a dummy response."]
 
-
+import json
 class DummyCompletionFn(CompletionFn):
     def __call__(
         self, prompt: Union[OpenAICreatePrompt, OpenAICreateChatPrompt, Prompt], **kwargs
@@ -72,25 +72,26 @@ def record_and_check_match(
     Returns:
         The matched option or None if no match found.
     """
-    if isinstance(expected, tuple):
-        expected = list(expected)
-    elif not isinstance(expected, list):
-        expected = [expected]
-    if options is None:
-        options = expected
+    # if isinstance(expected, tuple):
+    #     expected = list(expected)
+    # elif not isinstance(expected, list):
+    #     expected = [expected]
+    # if options is None:
+    #     options = expected
 
-    picked = None
-    for option in options:
-        if not sampled.startswith(option):
-            continue
-        if (
-            separator is not None
-            and len(sampled) > len(option)
-            and not separator(sampled[len(option)])
-        ):
-            continue
-        picked = option
-        break
+    # picked = None
+    # for option in options:
+    #     if not sampled.startswith(option):
+    #         continue
+    #     if (
+    #         separator is not None
+    #         and len(sampled) > len(option)
+    #         and not separator(sampled[len(option)])
+    #     ):
+    #         continue
+    #     picked = option
+    #     break
+    picked = sampled
 
     result = {
         "prompt": prompt,
@@ -98,7 +99,11 @@ def record_and_check_match(
         "options": options,
         "picked": picked,
     }
-    match = picked in expected
+
+    if picked is None:
+        picked = "[]"
+    match = (json.loads(picked) == json.loads(expected)) # "==" instead of "in" is a better match operator for our purposes
+
     result["expected"] = expected
     result["match"] = match
     record_match(match, expected=expected, picked=picked, sampled=sampled, options=options)

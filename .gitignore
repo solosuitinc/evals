@@ -12,3 +12,8 @@ venv/
 .idea/
 
 build
+
+# Our dataset; generate the set locally but do not commit it to the repo
+evals/registry/data/inbound/*.jsonl
+# In case our dataset is renamed
+**.jsonl
